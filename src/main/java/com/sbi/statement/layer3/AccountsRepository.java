@@ -7,5 +7,7 @@ import com.sbi.statement.layer2.Accounts;
 
 @Repository
 public interface AccountsRepository extends CrudRepository<Accounts, Integer> {
+	
+	public Accounts findByEmail(String email);
 
 }
