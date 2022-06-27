@@ -2,7 +2,15 @@ package com.sbi.statement.layer2;
 
 import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name="Accounts")
@@ -22,7 +30,8 @@ public class Accounts {
 	@Column(name="password")
 	private String password;
 	
-	@OneToMany(mappedBy="acct", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="acct", cascade=CascadeType.ALL,fetch = FetchType.EAGER)
+	@JsonManagedReference
 	private List<Transactions> trans;
 	
 	
@@ -67,6 +76,12 @@ public class Accounts {
 	}
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	@Override
+	public String toString() {
+		return "Accounts [accountNumber=" + accountNumber + ", email=" + email + ", accountHolderName="
+				+ accountHolderName + ", accountHolderAddress=" + accountHolderAddress + ", currentBalance="
+				+ currentBalance + ", password=" + password + ", trans=" + trans + "]";
 	}
 	
 	

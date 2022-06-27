@@ -1,8 +1,17 @@
 package com.sbi.statement.layer2;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name="Transactions")
@@ -13,7 +22,7 @@ public class Transactions {
 	@Column(name="trans_id")
 	private int transId;
 	@Column(name="trans_time")
-	private Date transTime;
+	private LocalDate transTime;
 	@Column(name="trans_type")
 	private char transType;
 	@Column(name="trans_amount")
@@ -25,6 +34,7 @@ public class Transactions {
 	
 	@ManyToOne
 	@JoinColumn(name="accNo")
+	@JsonBackReference
 	private Accounts acct;
 	
 	
@@ -40,11 +50,11 @@ public class Transactions {
 	public void setTransId(int transId) {
 		this.transId = transId;
 	}
-	public Date getTransTime() {
+	public LocalDate getTransTime() {
 		return transTime;
 	}
-	public void setTransTime(Date transTime) {
-		this.transTime = transTime;
+	public void setTransTime(LocalDate d) {
+		this.transTime = d;
 	}
 	public char getTransType() {
 		return transType;
@@ -70,6 +80,14 @@ public class Transactions {
 	public void setRemainingBalance(double remainingBalance) {
 		this.remainingBalance = remainingBalance;
 	}
+	@Override
+	public String toString() {
+		return "Transactions [transId=" + transId + ", transTime=" + transTime + ", transType=" + transType
+				+ ", transAmount=" + transAmount + ", refAccount=" + refAccount + ", remainingBalance="
+				+ remainingBalance + "]";
+	}
+	
+	
 
 	
 }
