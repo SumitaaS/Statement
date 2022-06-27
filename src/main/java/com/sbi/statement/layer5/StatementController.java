@@ -19,11 +19,18 @@ public class StatementController {
 	@Autowired
 	StatementService stmtServ;
 
-	@GetMapping("/fetch/monthly")
+	@GetMapping("/fetch/custom")
 	public List<Transactions> fetchCustomStatement(@RequestParam(name = "acc_no") int accNo,
 			@RequestParam(name = "start_date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
 			@RequestParam(name = "end_date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate) {
 		return stmtServ.getCustomStatement(fromDate, toDate, accNo);
+	}
+	
+	@GetMapping("/fetch/monthly")
+	public List<Transactions> fetchMonthlyStatement(@RequestParam(name = "acc_no") int accNo,
+			@RequestParam(name = "month") int month,
+			@RequestParam(name = "year") int year) {
+		return stmtServ.getMonthlyStatement(accNo,month,year);
 	}
 
 }

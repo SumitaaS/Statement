@@ -24,9 +24,15 @@ public class StatementServiceImplementation implements StatementService {
 	TransactionsRepository tranRepo;
 
 	@Override
-	public List<Transactions> getMonthlyStatement(int accNo, int month, int year) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Transactions> getMonthlyStatement(int acct_no, int month, int year) {
+		Accounts a = new Accounts();
+		a.setAccountNumber(acct_no);
+		LocalDate startDate = LocalDate.of(year, month, 01);
+		LocalDate endDate = startDate.withDayOfMonth(startDate.getMonth().length(startDate.isLeapYear()));
+
+		List<Transactions> tl = tranRepo.findByTransTimeBetweenAndAcct(startDate, endDate, a);
+		System.out.println("\t1.size" + tl.size());
+		return tl;
 	}
 
 	@Override
