@@ -18,7 +18,7 @@ public class Accounts {
 	
 	@Id
 	@Column(name="account_number")
-	private int accountNumber;
+	private String accountNumber;
 	@Column(name="email")
 	private String email;
 	@Column(name="account_holder_name")
@@ -41,10 +41,10 @@ public class Accounts {
 	public void setTrans(List<Transactions> trans) {
 		this.trans = trans;
 	}
-	public int getAccountNumber() {
+	public String getAccountNumber() {
 		return accountNumber;
 	}
-	public void setAccountNumber(int accountNumber) {
+	public void setAccountNumber(String accountNumber) {
 		this.accountNumber = accountNumber;
 	}
 	public String getEmail() {
@@ -83,7 +83,7 @@ public class Accounts {
 				+ accountHolderName + ", accountHolderAddress=" + accountHolderAddress + ", currentBalance="
 				+ currentBalance + ", password=" + password + ", trans=" + trans + "]";
 	}
-	
-	
+
 
 }
+
