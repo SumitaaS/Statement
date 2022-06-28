@@ -33,7 +33,7 @@ class StatementApplicationTests {
 		Accounts a = new Accounts();
 		a.setAccountHolderAddress("NaviMumbai");
 		a.setAccountHolderName("Sumitaa");
-		a.setAccountNumber(555555555);
+		a.setAccountNumber("555555555");
 		a.setCurrentBalance(100000);
 		a.setEmail("sumitaa@email.com");
 		a.setPassword("987654321");
@@ -196,7 +196,7 @@ class StatementApplicationTests {
 		Date d2 = Date.valueOf(s2);
 		LocalDate ld2=LocalDate.parse(s2);
 		
-		List<Transactions> tl = stmtServ.getCustomStatement(ld2,ld1,555555555);
+		List<Transactions> tl = stmtServ.getCustomStatementEmail(ld2,ld1,"sumisath@email.com");
 		Assertions.assertTrue(tl!=null);
 		for(Transactions t: tl)
 		{

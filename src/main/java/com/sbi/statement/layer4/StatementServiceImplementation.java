@@ -26,8 +26,7 @@ public class StatementServiceImplementation implements StatementService {
 	
 	@Override
 	public List<Transactions> getCustomStatementEmail(LocalDate date1, LocalDate date2, String email) {
-		
-		
+			
 		Accounts a = new Accounts();
 		a.setEmail(email);
 		a = acctRepo.findByEmail(email);
