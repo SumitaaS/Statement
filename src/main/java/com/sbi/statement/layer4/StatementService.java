@@ -10,9 +10,12 @@ import org.springframework.stereotype.Service;
 
 import com.sbi.statement.layer2.Accounts;
 import com.sbi.statement.layer2.Transactions;
+import com.sbi.statement.layer2.User;
 
 @Service
 public interface StatementService {
 	
-		public List<Transactions> getCustomStatementEmail(LocalDate ld1,LocalDate ld2,String e);
+		public List<Transactions> getCustomStatementEmail(LocalDate ld1,LocalDate ld2,String e) throws AccountsNotFoundException , TransactionsNotFoundException;
+
+		public Accounts checkLoginService(User user) throws AccountsNotFoundException, IncorrectPasswordException, TransactionsNotFoundException;
 }
