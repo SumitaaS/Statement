@@ -2,6 +2,8 @@ package com.sbi.statement.layer4;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,69 +32,96 @@ public class StatementPDFView {
 	
 	@Autowired
 	StatementService stmtServ;
+	
+	String USER_PASSWORD = "Password";
+	String OWNER_PASSWORD = "vijayPass";
+	
+	Document doc= null;
+	PdfWriter writer = null;
 
 	
-	public ByteArrayInputStream transactionList(String email, LocalDate fromDate, LocalDate toDate) throws DocumentException {
-
-		Document doc= new Document();
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		Accounts a = new Accounts();
-		a.setEmail(email);
-		a=acctRepo.findByEmail(email);
-		List<Transactions> tl = a.getTrans();
+	public String transactionList(String email, LocalDate fromDate, LocalDate toDate) throws DocumentException {
 		
 		try {
 			
-			PdfWriter.getInstance(doc, out);
+			Document doc= new Document();
+			PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream("D:\\Pdfs\\Statement-1111.pdf"));
+			
+			writer.setEncryption(USER_PASSWORD.getBytes(),
+	                OWNER_PASSWORD.getBytes(), PdfWriter.ALLOW_PRINTING|PdfWriter.ALLOW_COPY,
+	                PdfWriter.ENCRYPTION_AES_128);
+			
+			Accounts a = new Accounts();
+			a.setEmail(email);
+			a=acctRepo.findByEmail(email);
+			List<Transactions> tl = a.getTrans();
+			
+			
             PdfPTable table = new PdfPTable(6);
-            table.setWidthPercentage(100);
+            table.setWidthPercentage(90);
             table.setWidths(new int[]{1, 1, 1,1,1,1});
             table.setHorizontalAlignment(0);
+            table.setSpacingBefore(6f);
+            table.setSpacingAfter(6f);
             
             Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
             
-            Font paraFont = FontFactory.getFont(FontFactory.TIMES_BOLD, 20);
+            Font titleFont = FontFactory.getFont(FontFactory.TIMES_BOLD, 20);
+            
+            Font contentFont = FontFactory.getFont(FontFactory.TIMES_BOLD, 12);
 
             PdfPCell hcell;
             hcell = new PdfPCell(new Phrase("Transaction Date", headFont));
             hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            hcell.setBorderColor(BaseColor.BLUE);
+            hcell.setBackgroundColor(new BaseColor(52,167,244));
             table.addCell(hcell);
 
             hcell = new PdfPCell(new Phrase("Payment Type", headFont));
             hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            hcell.setBorderColor(BaseColor.BLUE);
+            hcell.setBackgroundColor(new BaseColor(52,167,244));
             table.addCell(hcell);
 
-            hcell = new PdfPCell(new Phrase("Particulars", headFont));
+            hcell = new PdfPCell(new Phrase("Sent To", headFont));
             hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            hcell.setBorderColor(BaseColor.BLUE);
+            hcell.setBackgroundColor(new BaseColor(52,167,244));
             table.addCell(hcell);
             
             hcell = new PdfPCell(new Phrase("Withdrawal (in INR)", headFont));
             hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            hcell.setBorderColor(BaseColor.BLUE);
+            hcell.setBackgroundColor(new BaseColor(52,167,244));
             table.addCell(hcell);
             
             hcell = new PdfPCell(new Phrase("Deposit (in INR)", headFont));
             hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            hcell.setBorderColor(BaseColor.BLUE);
+            hcell.setBackgroundColor(new BaseColor(52,167,244));
             table.addCell(hcell);
             
             hcell = new PdfPCell(new Phrase("Balance (in INR)", headFont));
             hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            hcell.setBorderColor(BaseColor.BLUE);
+            hcell.setBackgroundColor(new BaseColor(52,167,244));
             table.addCell(hcell);
+            
+            double currBal = 0;
             
             for (Transactions t : tl) 
             	                
             	{          	
 
                 PdfPCell cell;
-                
-                
 
                 cell = new PdfPCell(new Phrase(t.getTransTime().toString()));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
-                cell.setBorderColor(BaseColor.WHITE);
-                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                
+                cell.setBorderColor(BaseColor.BLUE);
+
+    
                 table.addCell(cell);
                 
                 String transType = String.valueOf(t.getTransType());
@@ -106,77 +135,102 @@ public class StatementPDFView {
                 }
 
                 cell = new PdfPCell(new Phrase(transType));
-                cell.setPaddingLeft(5);
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
-                cell.setBorderColorBottom(BaseColor.WHITE);
-                cell.setBorderWidthBottom(20);
-                cell.setBorderColor(BaseColor.WHITE);
-                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                cell.setBorderColor(BaseColor.BLUE);
                 table.addCell(cell);
                 
-                
+
                 cell = new PdfPCell(new Phrase(t.getRefAccount()));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
-                cell.setBorderColorBottom(BaseColor.WHITE);
-                cell.setBorderWidthBottom(20);
-                cell.setBorderColor(BaseColor.WHITE);
-                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                cell.setPaddingRight(5);
+                cell.setBorderColor(BaseColor.BLUE);
                 table.addCell(cell);
+                
 
-                cell = new PdfPCell(new Phrase(String.valueOf(t.getTransAmount())));
+                String transType1 = String.valueOf(t.getTransType());
+                String debit = null;
+                String credit = null;
+                if(transType1.equals("D"))
+                {
+                	debit = String.valueOf(t.getTransAmount());
+                	credit = "-";
+                
+                }
+                else
+                {
+                	debit = "-";
+                	credit = String.valueOf(t.getTransAmount());
+                }
+                cell = new PdfPCell(new Phrase(debit));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                cell.setPaddingRight(5);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
-                cell.setBorderColorBottom(BaseColor.WHITE);
-                cell.setBorderWidthBottom(20);
-                cell.setBorderColor(BaseColor.WHITE);
-                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                cell.setBorderColor(BaseColor.BLUE);
                 table.addCell(cell);
 
                 
-                cell = new PdfPCell(new Phrase(String.valueOf(t.getTransAmount())));
+                cell = new PdfPCell(new Phrase(credit));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                cell.setPaddingRight(5);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
-                cell.setBorderColor(BaseColor.WHITE);
-                cell.setBorderWidthBottom(20);
-                cell.setBorderColorBottom(BaseColor.WHITE);
-                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                cell.setBorderColor(BaseColor.BLUE);
                 table.addCell(cell);
                 
                 cell = new PdfPCell(new Phrase(String.valueOf(t.getRemainingBalance())));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                cell.setPaddingRight(5);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
-                cell.setBorderColor(BaseColor.WHITE);
-                cell.setBorderWidthBottom(20);
-                cell.setBorderColorBottom(BaseColor.WHITE);
-                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                cell.setBorderColor(BaseColor.BLUE);
+                cell.setPaddingLeft(10);
+                cell.setUseBorderPadding(true);
+                
+                currBal = t.getRemainingBalance();
                 table.addCell(cell);    
             }
 			doc.open();
-			Paragraph para=new Paragraph(new Phrase("Statement",paraFont));
+			Paragraph para=new Paragraph(new Phrase("Statement",titleFont));
+			
+			Paragraph empty=new Paragraph(new Phrase("       ",contentFont));
+			
+			Paragraph accHolderName=new Paragraph(new Phrase(a.getAccountHolderName(),contentFont));
+			Paragraph accHolderAddress=new Paragraph(new Phrase("Address :\t"+a.getAccountHolderAddress(),contentFont));
+			Paragraph accNumber=new Paragraph(new Phrase("Account Number :\t"+a.getAccountNumber(),contentFont));
+			Paragraph tranFromDate=new Paragraph(new Phrase("From Date :\t"+String.valueOf(fromDate),contentFont));
+			Paragraph tranToDate=new Paragraph(new Phrase("To Date :\t"+String.valueOf(toDate),contentFont));
+			Paragraph email1=new Paragraph(new Phrase("Email :\t"+a.getEmail(),contentFont));
+			Paragraph currBalance=new Paragraph(new Phrase("Current Balance :\t"+currBal,contentFont));
+			
 			para.setAlignment(Element.ALIGN_CENTER);
 			doc.add(para);
+			doc.add(empty);
+			doc.add(empty);
+			doc.add(accHolderName);
+			accHolderName.setAlignment(Element.ALIGN_RIGHT);
+			doc.add(accHolderAddress);
+			doc.add(accNumber);
+			doc.add(tranFromDate);
+			doc.add(tranToDate);
+			doc.add(email1);
+			doc.add(currBalance);
+			doc.add(empty);
 			doc.add(table);
 			doc.close();
 		} catch (DocumentException e) {
 			// TODO Auto-generated catch block
 			throw e;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		return new ByteArrayInputStream(out.toByteArray());
+		return "D:\\Pdfs\\Statement-1111.pdf";
 		
 			
 		
 	}
 
 }
+
