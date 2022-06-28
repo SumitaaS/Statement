@@ -1,9 +1,11 @@
 package com.sbi.statement.layer3;
 
+import java.awt.print.Pageable;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -16,5 +18,7 @@ import com.sbi.statement.layer2.Transactions;
 public interface TransactionsRepository extends CrudRepository <Transactions, Integer>{
 	
 	public List<Transactions> findByTransTimeBetweenAndAcct(LocalDate date1, LocalDate date2, Accounts account);
+	
+	public List<Transactions> findFirst10ByOrderByTransTimeDesc();
 	
 }
