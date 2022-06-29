@@ -7,6 +7,10 @@ import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.swing.border.Border;
+import javax.swing.border.SoftBevelBorder;
+
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,22 +58,45 @@ public class StatementPDFView {
 			Accounts a = new Accounts();
 			a.setEmail(email);
 			a=acctRepo.findByEmail(email);
-			List<Transactions> tl = a.getTrans();
+			List<Transactions> transList = a.getTrans();
 			
+			double currBal = a.getCurrentBalance();
 			
+			Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+            
+            Font titleFont = FontFactory.getFont(FontFactory.TIMES_BOLD, 14);
+            
+            Font contentFont = FontFactory.getFont(FontFactory.TIMES_BOLD, 11);
+            
+            Paragraph para=new Paragraph(new Phrase("Statement",titleFont));
+			
+			Paragraph empty=new Paragraph(new Phrase("       ",contentFont));
+			
+			Paragraph accHolderName=new Paragraph(new Phrase(a.getAccountHolderName(),contentFont));
+			Paragraph accHolderAddress=new Paragraph(new Phrase("Address :\t"+a.getAccountHolderAddress(),contentFont));
+			Paragraph accNumber=new Paragraph(new Phrase("Account Number :\t"+a.getAccountNumber(),contentFont));
+			Paragraph tranFromDate=new Paragraph(new Phrase("From Date :\t"+String.valueOf(fromDate),contentFont));
+			Paragraph tranToDate=new Paragraph(new Phrase("To Date :\t"+String.valueOf(toDate),contentFont));
+			Paragraph email1=new Paragraph(new Phrase("Email :\t"+a.getEmail(),contentFont));
+			Paragraph currBalance=new Paragraph(new Phrase("Current Balance :\t"+String.valueOf(currBal),contentFont));
+			
+            int chunkSize = 34;
+
+            List<List<Transactions>> partitionedList = ListUtils.partition(transList, chunkSize);
+
+            doc.open();
+            
+            for (List<Transactions> tl: partitionedList)
+            {
+						
             PdfPTable table = new PdfPTable(6);
-            table.setWidthPercentage(90);
+            table.setWidthPercentage(95);
             table.setWidths(new int[]{1, 1, 1,1,1,1});
             table.setHorizontalAlignment(0);
             table.setSpacingBefore(6f);
             table.setSpacingAfter(6f);
-            
-            Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
-            
-            Font titleFont = FontFactory.getFont(FontFactory.TIMES_BOLD, 20);
-            
-            Font contentFont = FontFactory.getFont(FontFactory.TIMES_BOLD, 12);
-
+            table.setHeaderRows(1);
+           
             PdfPCell hcell;
             hcell = new PdfPCell(new Phrase("Transaction Date", headFont));
             hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -106,9 +133,7 @@ public class StatementPDFView {
             hcell.setBorderColor(BaseColor.BLUE);
             hcell.setBackgroundColor(new BaseColor(52,167,244));
             table.addCell(hcell);
-            
-            double currBal = 0;
-            
+                       
             for (Transactions t : tl) 
             	                
             	{          	
@@ -120,8 +145,6 @@ public class StatementPDFView {
                 cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
                 cell.setBorderColor(BaseColor.BLUE);
-
-    
                 table.addCell(cell);
                 
                 String transType = String.valueOf(t.getTransType());
@@ -141,14 +164,12 @@ public class StatementPDFView {
                 cell.setBorderColor(BaseColor.BLUE);
                 table.addCell(cell);
                 
-
                 cell = new PdfPCell(new Phrase(t.getRefAccount()));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                 cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
                 cell.setBorderColor(BaseColor.BLUE);
                 table.addCell(cell);
-                
 
                 String transType1 = String.valueOf(t.getTransType());
                 String debit = null;
@@ -170,7 +191,6 @@ public class StatementPDFView {
                 cell.setBorder(20);
                 cell.setBorderColor(BaseColor.BLUE);
                 table.addCell(cell);
-
                 
                 cell = new PdfPCell(new Phrase(credit));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -184,31 +204,18 @@ public class StatementPDFView {
                 cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cell.setBorder(20);
                 cell.setBorderColor(BaseColor.BLUE);
-                cell.setPaddingLeft(10);
-                cell.setUseBorderPadding(true);
-                
-                currBal = t.getRemainingBalance();
-                table.addCell(cell);    
+                cell.setBorderWidthRight(1);
+                table.addCell(cell); 
+                currBal = t.getRemainingBalance();      
             }
-			doc.open();
-			Paragraph para=new Paragraph(new Phrase("Statement",titleFont));
 			
-			Paragraph empty=new Paragraph(new Phrase("       ",contentFont));
 			
-			Paragraph accHolderName=new Paragraph(new Phrase(a.getAccountHolderName(),contentFont));
-			Paragraph accHolderAddress=new Paragraph(new Phrase("Address :\t"+a.getAccountHolderAddress(),contentFont));
-			Paragraph accNumber=new Paragraph(new Phrase("Account Number :\t"+a.getAccountNumber(),contentFont));
-			Paragraph tranFromDate=new Paragraph(new Phrase("From Date :\t"+String.valueOf(fromDate),contentFont));
-			Paragraph tranToDate=new Paragraph(new Phrase("To Date :\t"+String.valueOf(toDate),contentFont));
-			Paragraph email1=new Paragraph(new Phrase("Email :\t"+a.getEmail(),contentFont));
-			Paragraph currBalance=new Paragraph(new Phrase("Current Balance :\t"+currBal,contentFont));
 			
 			para.setAlignment(Element.ALIGN_CENTER);
 			doc.add(para);
 			doc.add(empty);
 			doc.add(empty);
 			doc.add(accHolderName);
-			accHolderName.setAlignment(Element.ALIGN_RIGHT);
 			doc.add(accHolderAddress);
 			doc.add(accNumber);
 			doc.add(tranFromDate);
@@ -217,7 +224,10 @@ public class StatementPDFView {
 			doc.add(currBalance);
 			doc.add(empty);
 			doc.add(table);
-			doc.close();
+			
+            }
+            
+            doc.close();
 		} catch (DocumentException e) {
 			// TODO Auto-generated catch block
 			throw e;
